@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Graph Routing Map</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css"/>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+        <style>
+            body { margin: 0; overflow: hidden; font-family: sans-serif; }
+            #map { height: 100vh; width: 100%; }
+            .leaflet-popup-content-wrapper { border-radius: 5px; }
+        </style>
+    </head>
+    <body>
+        <div id="map"></div>
+
+        <script>
+            var map;
+            var qtBridge; // Reference to the C++ QWebChannel object
+            var drawnItems; // FeatureGroup to store drawn obstacles
+
+            // --- Map Initialization ---
+            document.addEventListener('DOMContentLoaded', (event) => {
+                map = L.map('map').setView([-16.3989, -71.5350], 13); // Centered on Arequipa, Peru
+
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(map);
+
+                drawnItems = new L.FeatureGroup(); // Layer to hold drawn items (obstacles)
+                map.addLayer(drawnItems);
+
+                // Configure Leaflet.Draw controls
+                var drawControl = new L.Control.Draw({
+                    edit: {
+                        featureGroup: drawnItems
+                    },
+                    draw: {
+                        polyline: false, // Don't allow freehand lines
+                        polygon: {
+                            shapeOptions: { color: 'black', fillColor: 'black', fillOpacity: 0.5 }
+                        },
+                        rectangle: {
+                            shapeOptions: { color: 'black', fillColor: 'black', fillOpacity: 0.5 }
+                        },
+                        circle: {
+                            shapeOptions: { color: 'black', fillColor: 'black', fillOpacity: 0.5 }
+                        },
+                        marker: { // Allow single marker for individual obstacle node selection
+                            icon: L.divIcon({ className: 'obstacle-marker-icon', html: '<div style="background-color: black; width: 12px; height: 12px; border-radius: 50%;"></div>' })
+                        },
+                        circlemarker: false // Less common for obstacles
+                    }
+                });
+                map.addControl(drawControl);
+
+                console.log("Leaflet map and Draw control initialized.");
+
+                // --- QWebChannel Setup (JS <-> C++ Bridge) ---
+                if (typeof qt !== 'undefined' && typeof qt.webChannelTransport !== 'undefined') {
+                    new QWebChannel(qt.webChannelTransport, function(channel) {
+                        qtBridge = channel.objects.mapInterface; // "mapInterface" is the name from C++
+                        if (qtBridge) {
+                            console.log("QWebChannel connected. C++ interface available.");
+                            qtBridge.onMapLoaded(); // Notify C++ that the map is ready
+                        } else {
+                            console.error("QWebChannel: 'mapInterface' object not found in channel.");
+                        }
+                    });
+                } else {
+                    console.warn("QWebChannel not available. Running in standalone browser mode?");
+                }
+
+                // --- JavaScript Functions Callable from C++ ---
+                window.updateMapDisplay = function(jsonDataString) {
+                    console.log("JS: Received map data from C++.");
+                    const data = JSON.parse(jsonDataString);
+
+                    // Clear previous graph/route layers (but not drawn obstacles)
+                    map.eachLayer(function(layer) {
+                        if (layer.options && (layer.options.isNode || layer.options.isEdge || layer.options.isRoute)) {
+                            map.removeLayer(layer);
+                        }
+                    });
+
+                    // Store current layers for easy removal
+                    var tempLayers = [];
+
+                    // Draw Nodes
+                    data.nodes.forEach(node => {
+                        let markerColor = 'blue';
+                        let markerRadius = 5;
+                        let markerOpacity = 0.8;
+                        if (data.originNodeId === node.id) { markerColor = 'green'; markerRadius = 8; }
+                        else if (data.destinationNodeId === node.id) { markerColor = 'purple'; markerRadius = 8; }
+                        else if (data.obstacleNodeIds && data.obstacleNodeIds.includes(node.id)) { markerColor = 'red'; markerRadius = 7; }
+
+                        const marker = L.circleMarker([node.lat, node.lon], {
+                            radius: markerRadius,
+                            color: markerColor,
+                            fillColor: markerColor,
+                            fillOpacity: markerOpacity,
+                            isNode: true // Custom option to identify this layer type
+                        }).addTo(map);
+                        marker.bindPopup(`<b>Node ID: ${node.id}</b><br>Lat: ${node.lat.toFixed(6)}<br>Lon: ${node.lon.toFixed(6)}`);
+                        tempLayers.push(marker);
+
+                        // Attach click listener for individual node selection
+                        marker.on('click', function(e) {
+                            if (qtBridge) {
+                                qtBridge.onNodeClick(node.id); // Send node ID to C++
+                                // You might want to visually highlight the selected node here too
+                            }
+                        });
+                    });
+
+                    // Draw Edges (for triangulation visualization)
+                    data.edges.forEach(edge => {
+                        const polyline = L.polyline([[edge.startLat, edge.startLon], [edge.endLat, edge.endLon]], {
+                            color: 'grey',
+                            weight: 1,
+                            opacity: 0.6,
+                            isEdge: true // Custom option
+                        }).addTo(map);
+                        tempLayers.push(polyline);
+                    });
+
+                    // Draw Route
+                    if (data.route && data.route.length > 0) {
+                        const routeCoords = data.route.map(node => [node.lat, node.lon]);
+                        const routePolyline = L.polyline(routeCoords, {
+                            color: 'red',
+                            weight: 5,
+                            opacity: 0.9,
+                            isRoute: true // Custom option
+                        }).addTo(map);
+                        tempLayers.push(routePolyline);
+                    }
+
+                    // If this is the initial load or a full redraw, fit map to all nodes
+                    if (data.nodes.length > 0) {
+                         const bounds = L.latLngBounds(data.nodes.map(node => [node.lat, node.lon]));
+                         map.fitBounds(bounds, { padding: [20, 20] });
+                    }
+                };
+
+                // --- JavaScript Event Listeners (User Interaction) ---
+
+                // For drawing obstacles (using Leaflet.Draw)
+                map.on(L.Draw.Event.CREATED, function(e) {
+                    var layer = e.layer;
+                    drawnItems.addLayer(layer); // Add drawn shape to our feature group
+
+                    if (qtBridge) {
+                        if (e.layerType === 'marker') {
+                            // For individual marker obstacles, send Lat/Lon
+                            qtBridge.onObstacleMarkerDrawn(layer.getLatLng().lat, layer.getLatLng().lng);
+                        } else if (e.layerType === 'rectangle' || e.layerType === 'polygon' || e.layerType === 'circle') {
+                            // For area obstacles, send bounds or GeoJSON
+                            // For simplicity, let's send bounding box for rectangle/polygon
+                            const bounds = layer.getBounds();
+                            qtBridge.onObstacleAreaDrawn(
+                                bounds.getSouthWest().lat, bounds.getSouthWest().lng,
+                                bounds.getNorthEast().lat, bounds.getNorthEast().lng
+                            );
+                        }
+                    }
+                });
+
+                // Handle when a drawn shape is edited or deleted
+                map.on(L.Draw.Event.EDITED, function(e) {
+                    // You might need to re-send the updated bounds to C++
+                    console.log("Drawn layer edited:", e.layers);
+                });
+                map.on(L.Draw.Event.DELETED, function(e) {
+                    // You'll need to notify C++ to remove these obstacles
+                    console.log("Drawn layer deleted:", e.layers);
+                    // For each layer in e.layers, if you stored an ID, send it to C++
+                });
+            });
+        </script>
+    </body>
+</html>
