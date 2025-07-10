@@ -9,7 +9,7 @@ SingleLinkedList::~SingleLinkedList() {
 	clear();
 }
 
-node** SingleLinkedList::findPosition(int _data) {
+node** SingleLinkedList::find_Position(int _data) {
 	node** pointer = &m_head;
 	while (*pointer && (*pointer)->m_data < _data) {
 		pointer = &((*pointer)->m_next);
@@ -17,7 +17,7 @@ node** SingleLinkedList::findPosition(int _data) {
 	return pointer;
 }
 
-node** SingleLinkedList::findNode(int _data) {
+node** SingleLinkedList::find_Node(int _data) {
 	node** pointer = &m_head;
 	while (*pointer && (*pointer)->m_data != _data) {
 		pointer = &((*pointer)->m_next);
@@ -26,8 +26,8 @@ node** SingleLinkedList::findNode(int _data) {
 }
 
 bool SingleLinkedList::insertAtBegin(int _data) {
-	node* newNode = new Node(_data);
-	newNode->m_next = m_head
+	node* newNode = new node(_data);
+	newNode->m_next = m_head;
 	m_head = newNode;
 	if (m_tail== &m_head) {
 		m_tail = &newNode->m_next;
@@ -36,7 +36,7 @@ bool SingleLinkedList::insertAtBegin(int _data) {
 }
 
 bool SingleLinkedList::insertAtEnd(int _data) {
-	node* newNode = new Node(_data);
+	node* newNode = new node(_data);
 	*m_tail = newNode;
 	m_tail = &newNode->m_next;
 	newNode->m_next = nullptr;
@@ -44,7 +44,7 @@ bool SingleLinkedList::insertAtEnd(int _data) {
 }
 
 bool SingleLinkedList::insertInOrder(int _data) {
-	node** pointer = findPosition(_data);
+	node** pointer = find_Position(_data);
 	if (*pointer && (*pointer)->m_data == _data) {
 		return false;
 	}
@@ -59,7 +59,7 @@ bool SingleLinkedList::insertInOrder(int _data) {
 }
 
 bool SingleLinkedList::remove(int _data) {
-	node** pointer = findNode(_data):
+	node** pointer = find_Node(_data);
 	if (*pointer == nullptr) {
 		return false;
 	}
@@ -107,11 +107,11 @@ bool SingleLinkedList::isEmpty() const {
 	return m_head == nullptr;
 }
 
-bool SingleLinkedList::size() const {
+int SingleLinkedList::size() const {
 	int count = 0;
 	node* current = m_head;
 	while(current) {
-		const++;
+		count++;
 		current = current->m_next;
 	}
 	return count;

@@ -4,7 +4,7 @@
 class node {
 public:
 	int m_data;
-	Node* m_next;
+	node* m_next;
 
 	node(int data);
 	~node();

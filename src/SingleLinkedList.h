@@ -8,8 +8,8 @@ private:
 	node* m_head;
 	node** m_tail;
 
-	node** findPosition(int _data);
-	node** findNode(int _data);
+	node** find_Position(int _data);
+	node** find_Node(int _data);
 
 public:
 	SingleLinkedList();
@@ -21,12 +21,12 @@ public:
 	bool remove(int _data);
 
 	bool find(int _data);
-	node* finNode(int _data);
+	node* findNode(int _data);
 
 	void print() const;
 	bool isEmpty() const;
 	int size() const;
-	void clear;
+	void clear();
 };
 
 #endif
