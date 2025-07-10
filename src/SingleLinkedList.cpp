@@ -97,10 +97,16 @@ node* SingleLinkedList::findNode(int _data) {
 
 void SingleLinkedList::print() const {
 	node* current = m_head;
+	if (!current) {
+		std::cout << "Empty" << std::endl;
+		return;
+	}
+
 	while (current) {
 		std::cout <<current->m_data << " ";
+		current = current->m_next;
 	}
-	std::cout << "Empty" << std::endl;
+	std::cout << std::endl;
 }
 
 bool SingleLinkedList::isEmpty() const {
