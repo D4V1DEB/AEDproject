@@ -94,10 +94,10 @@ int Vector<T>::search(T item) const {
 }
 
 template<class T>
-T Vector<T>::get(int i) const {
+const T& Vector<T>::get(int i) const {
     if (i < 0 || i >= index) {
         std::cout << "Error: Index out of bounds" << std::endl;
-        return T();
+        exit(1);
     }
     return data[i];
 }

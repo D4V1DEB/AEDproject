@@ -24,7 +24,8 @@ public:
     void remove_index_swap(int i);
     void remove_index(int i);
     int search(T item) const;
-    T get(int i) const;
+    T& get(int i);
+    const T& get(int i) const;
     void set(int i, T item);
     int size() const;
     int get_capacity() const;
