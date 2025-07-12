@@ -6,7 +6,7 @@
 #include <string>
 
 // forward
-template<class T> class Node;
+template<class T> class GraphNode;
 template<class T> class Edge;
 
 template<class _N, class _E>
@@ -15,7 +15,7 @@ public:
     typedef _N N;
     typedef _E E;
     typedef Traits<_N, _E> self;
-    typedef Node<self> node;
+    typedef GraphNode<self> node;
     typedef Edge<self> edge;
 };
 
@@ -31,25 +31,30 @@ public:
 };
 
 template<class T>
-class Node {
+class GraphNode {
 public:
     typedef typename T::N N;
     typedef typename T::edge edge;
     N data;
     Vector<edge*> adjacency;
     
-    Node(N _data);
+    GraphNode(N _data);
+    
+    // Const-qualified method to get adjacency size
+    int adjacency_size() const {
+        return adjacency.size();
+    }
 };
 
 template<class T>
 class Graph {
 public:
-    typedef typename T::node Node;
+    typedef typename T::node GraphNode;
     typedef typename T::N N;
     typedef typename T::E E;
     typedef typename T::edge edge;
     
-    Vector<Node*> vertices;
+    Vector<GraphNode*> vertices;
     Vector<Vector<E>> matrix;
     Vector<bool> visited;
 
