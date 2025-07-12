@@ -59,6 +59,7 @@ public:
     int index_of(N data);
     void init_visited();
     void validation(int u, int v);
+    void resize_matrix();
 
     Graph(bool _directed = false);
     void add_node(N _data);
