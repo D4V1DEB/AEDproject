@@ -103,6 +103,14 @@ T Vector<T>::get(int i) const {
 }
 
 template<class T>
+void Vector<T>::set(int i, T item) {
+    if (i < 0 || i >= index) {
+        return;
+    }
+    data[i] = item;
+}
+
+template<class T>
 int Vector<T>::size() const {
     return index;
 }

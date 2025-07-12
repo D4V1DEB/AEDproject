@@ -25,6 +25,7 @@ public:
     void remove_index(int i);
     int search(T item) const;
     T get(int i) const;
+    void set(int i, T item);
     int size() const;
     int get_capacity() const;
     bool is_empty() const;
