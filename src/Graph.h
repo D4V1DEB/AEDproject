@@ -50,13 +50,30 @@ public:
     typedef typename T::edge edge;
     
     Vector<Node*> vertices;
+    Vector<Vector<E>> matrix;
+    Vector<bool> visited;
+
+    bool directed;
     
+    //auxiliar
+    int index_of(N data);
+    void init_visited();
+    void validation(int u, int v);
+
+    Graph(bool _directed = false);
     void add_node(N _data);
     bool find(N val, int& pos);
     void add_edge(N u, N v, E w);
-    void print_graph();
+    void add_edge_by_index(int u, int v, E w);
+    void print_graph(); //debug
+    void print_matrix(); //debug
     int num_vertices() const;
     int num_edges() const;
+
+    //Busquedas
+    void Depth_First_Search(N s, N t);
+    void Breadth_First_Search(N s, N t);
+
     ~Graph();
 };
 
