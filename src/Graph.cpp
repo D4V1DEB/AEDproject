@@ -38,22 +38,38 @@ void Graph<T>::validation(int u, int v) {
     }
 }
 
+inline int min_value(int a, int b) {
+    return (a < b) ? a : b;
+}
+
+inline int abs_value(int x) {
+    return (x < 0) ? -x : x;
+}
+
 template<class T>
 void Graph<T>::resize_matrix() {
     int new_size = vertices.size();
-
-    for(int i =0; i < matrix.size(); ++i) {
-        while (matrix.get(i).size() < new_size) {
-            matrix.get(i).add_item_end(E());
+    int current_size = matrix.size();
+    
+    if (new_size == current_size) {
+        return;
+    }
+    
+    int min_size = min_value(current_size, new_size);
+    for (int i = 0; i < min_size; ++i) {
+        matrix.get(i).resize_to_size(new_size);
+    }
+    
+    if (new_size > current_size) {
+        for (int i = current_size; i < new_size; ++i) {
+            Vector<E> new_row;
+            new_row.resize_to_size(new_size);
+            matrix.add_item_end(new_row);
         }
     }
-
-    while(matrix.size() < new_size) {
-        Vector<E> new_row;
-        for (int j = 0; j< new_size; ++j) {
-            new_row.add_item_end(E());
-        }
-        matrix.add_item_end(new_row);
+    
+    else if (new_size < current_size) {
+        matrix.resize_to_size(new_size);
     }
 }
 
@@ -240,15 +256,32 @@ void Graph<T>::Breadth_First_Search(typename T::N s, typename T::N t) {
 
 template<class T>
 Graph<T>::~Graph() {
+    Vector<edge*> deleted_edges;
+    
     for (int i = 0; i < vertices.size(); ++i) {
         GraphNode* node = vertices.get(i);
         for (int j = 0; j < node->adjacency.size(); ++j) {
-            delete node->adjacency.get(j);
+            edge* e = node->adjacency.get(j);
+            
+            bool already_deleted = false;
+            for (int k = 0; k < deleted_edges.size(); ++k) {
+                if (deleted_edges.get(k) == e) {
+                    already_deleted = true;
+                    break;
+                }
+            }
+            
+            if (!already_deleted) {
+                deleted_edges.add_item_end(e);
+                delete e;
+            }
         }
-        delete node;
+    }
+    
+    for (int i = 0; i < vertices.size(); ++i) {
+        delete vertices.get(i);
     }
 }
-
 
 // Instanciacion
 template class Edge<Traits<int, int>>;
