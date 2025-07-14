@@ -48,6 +48,7 @@ std::ostream& operator<<(std::ostream& os, const Vector<T>& vec);
 
 std::ostream& operator<<(std::ostream& os, const Vector<Vector<int>>& vec);
 std::ostream& operator<<(std::ostream& os, const Vector<Vector<float>>& vec);
+std::ostream& operator<<(std::ostream& os, const Vector<Vector<double>>& vec);
 
 template<typename K, typename V>
 class Traits;
@@ -64,6 +65,7 @@ extern template class Vector<int>;
 extern template class Vector<float>;
 extern template class Vector<Vector<int>>;
 extern template class Vector<Vector<float>>;
+extern template class Vector<Vector<double>>;
 
 extern template class Vector<GraphNode<Traits<int, int>>*>;
 extern template class Vector<Edge<Traits<int, int>>*>;

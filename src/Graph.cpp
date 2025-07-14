@@ -287,12 +287,18 @@ Graph<T>::~Graph() {
 template class Edge<Traits<int, int>>;
 template class Edge<Traits<std::string, int>>;
 template class Edge<Traits<double, float>>;
+template class Edge<Traits<std::string, float>>;
+template class Edge<Traits<int, double>>;
 
 template class GraphNode<Traits<int, int>>;
 template class GraphNode<Traits<std::string, int>>;
 template class GraphNode<Traits<double, float>>;
+template class GraphNode<Traits<std::string, float>>;
+template class GraphNode<Traits<int, double>>;
 
 template class Graph<Traits<int, int>>;
 template class Graph<Traits<std::string, int>>;
 template class Graph<Traits<double, float>>;
+template class Graph<Traits<std::string, float>>;
+template class Graph<Traits<int, double>>;
 //... mas de ser necesario

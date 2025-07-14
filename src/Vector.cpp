@@ -216,8 +216,10 @@ bool Vector<T>::operator<(const Vector<T>& other) const {
 template class Vector<bool>;
 template class Vector<int>;
 template class Vector<float>;
+template class Vector<double>;
 template class Vector<Vector<int>>;
 template class Vector<Vector<float>>;
+template class Vector<Vector<double>>;
 
 // Nested vectors - only instantiate specific methods to avoid issues with operators
 // Vector<Vector<int>> specializations
@@ -231,6 +233,12 @@ template class Vector<GraphNode<Traits<double, float>>*>;
 template class Vector<Edge<Traits<int, int>>*>;
 template class Vector<Edge<Traits<std::string, int>>*>;
 template class Vector<Edge<Traits<double, float>>*>;
+
+//other 
+template class Vector<GraphNode<Traits<std::string, float>>*>;
+template class Vector<Edge<Traits<std::string, float>>*>;
+template class Vector<GraphNode<Traits<int, double>>*>;
+template class Vector<Edge<Traits<int, double>>*>;
 
 // Implementation of operator<< (declared in Vector.h)
 template<class T>
@@ -273,9 +281,25 @@ std::ostream& operator<<(std::ostream& os, const Vector<Vector<float>>& vec) {
     return os;
 }
 
+// Specialized operator<< for Vector<Vector<double>>
+std::ostream& operator<<(std::ostream& os, const Vector<Vector<double>>& vec) {
+    os << "[ ";
+    for (int i = 0; i < vec.size(); ++i) {
+        os << "[ ";
+        const Vector<double>& inner = vec.get(i);
+        for (int j = 0; j < inner.size(); ++j) {
+            os << inner.get(j) << " ";
+        }
+        os << "] ";
+    }
+    os << "]";
+    return os;
+}
+
 // Explicit instantiations of operator<< for the types we need
 template std::ostream& operator<<(std::ostream& os, const Vector<int>& vec);
 template std::ostream& operator<<(std::ostream& os, const Vector<float>& vec);
+template std::ostream& operator<<(std::ostream& os, const Vector<double>& vec);
 template std::ostream& operator<<(std::ostream& os, const Vector<bool>& vec);
 template std::ostream& operator<<(std::ostream& os, const Vector<GraphNode<Traits<int, int>>*>& vec);
 template std::ostream& operator<<(std::ostream& os, const Vector<GraphNode<Traits<std::string, int>>*>& vec);
