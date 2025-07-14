@@ -4,17 +4,41 @@
 
 template<class T>
 Vector<T>::Vector(int initialCapacity) {
-    if (initialCapacity <= 0) {
-        initialCapacity = 10;
-    }
-    capacity = initialCapacity;
-    data = new T[capacity];
+    capacity = initialCapacity > 0 ? initialCapacity : 10;
     index = 0;
+    data = new T[capacity];
 }
 
 template<class T>
+Vector<T>::Vector(const Vector<T>& other) {
+    capacity = other.capacity;
+    index = other.index;
+    data = new T[capacity];
+    for (int i = 0; i < index; ++i) {
+        data[i] = other.data[i];
+    }
+}
+
+template<class T>
+Vector<T>& Vector<T>::operator=(const Vector<T>& other) {
+    if (this != &other) {
+        delete[] data;
+        capacity = other.capacity;
+        index = other.index;
+        data = new T[capacity];
+        for (int i = 0; i < index; ++i) {
+            data[i] = other.data[i];
+        }
+    }
+    return *this;
+}
+
+template <class T>
 Vector<T>::~Vector() {
-    delete[] data;
+    if (data != nullptr) {
+        delete[] data;
+        data = nullptr;
+    }
 }
 
 template<class T>
@@ -103,6 +127,15 @@ const T& Vector<T>::get(int i) const {
 }
 
 template<class T>
+T& Vector<T>::get(int i) {
+    if (i < 0 || i >= index) {
+        std::cout << "Error: Index out of bounds" << std::endl;
+        exit(1);
+    }
+    return data[i];
+}
+
+template<class T>
 void Vector<T>::set(int i, T item) {
     if (i < 0 || i >= index) {
         return;
@@ -144,10 +177,109 @@ void Vector<T>::print() const {
     std::cout << "Size: " << index << ", Capacity: " << capacity << std::endl;
 }
 
-// nstanciaciones
-template class Vector<Node<Traits<int, int>>*>;
+template<class T>
+void Vector<T>::resize_to_size(int new_size) {
+    if (new_size > capacity) {
+        resize(new_size);
+    }
+    
+    while (index < new_size) {
+        data[index++] = T();
+    }
+    
+    if (new_size < index) {
+        index = new_size;
+    }
+}
+
+// Instantiations
+template<class T>
+bool Vector<T>::operator==(const Vector<T>& other) const {
+    if (index != other.index) return false;
+    for (int i = 0; i < index; ++i) {
+        if (!(data[i] == other.data[i])) return false;
+    }
+    return true;
+}
+
+template<class T>
+bool Vector<T>::operator<(const Vector<T>& other) const {
+    int minSize = std::min(index, other.index);
+    for (int i = 0; i < minSize; ++i) {
+        if (data[i] < other.data[i]) return true;
+        if (other.data[i] < data[i]) return false;
+    }
+    return index < other.index;
+}
+
+// Basic types
+template class Vector<bool>;
+template class Vector<int>;
+template class Vector<float>;
+template class Vector<Vector<int>>;
+template class Vector<Vector<float>>;
+
+// Nested vectors - only instantiate specific methods to avoid issues with operators
+// Vector<Vector<int>> specializations
+
+// GraphNode specializations
+template class Vector<GraphNode<Traits<int, int>>*>;
+template class Vector<GraphNode<Traits<std::string, int>>*>;
+template class Vector<GraphNode<Traits<double, float>>*>;
+
+// Edge specializations
 template class Vector<Edge<Traits<int, int>>*>;
-template class Vector<Node<Traits<std::string, int>>*>;
 template class Vector<Edge<Traits<std::string, int>>*>;
-template class Vector<Node<Traits<double, float>>*>;
 template class Vector<Edge<Traits<double, float>>*>;
+
+// Implementation of operator<< (declared in Vector.h)
+template<class T>
+std::ostream& operator<<(std::ostream& os, const Vector<T>& vec) {
+    os << "[ ";
+    for (int i = 0; i < vec.size(); ++i) {
+        os << vec.get(i) << " ";
+    }
+    os << "]";
+    return os;
+}
+
+// Specialized operator<< for Vector<Vector<int>>
+std::ostream& operator<<(std::ostream& os, const Vector<Vector<int>>& vec) {
+    os << "[ ";
+    for (int i = 0; i < vec.size(); ++i) {
+        os << "[ ";
+        const Vector<int>& inner = vec.get(i);
+        for (int j = 0; j < inner.size(); ++j) {
+            os << inner.get(j) << " ";
+        }
+        os << "] ";
+    }
+    os << "]";
+    return os;
+}
+
+// Specialized operator<< for Vector<Vector<float>>
+std::ostream& operator<<(std::ostream& os, const Vector<Vector<float>>& vec) {
+    os << "[ ";
+    for (int i = 0; i < vec.size(); ++i) {
+        os << "[ ";
+        const Vector<float>& inner = vec.get(i);
+        for (int j = 0; j < inner.size(); ++j) {
+            os << inner.get(j) << " ";
+        }
+        os << "] ";
+    }
+    os << "]";
+    return os;
+}
+
+// Explicit instantiations of operator<< for the types we need
+template std::ostream& operator<<(std::ostream& os, const Vector<int>& vec);
+template std::ostream& operator<<(std::ostream& os, const Vector<float>& vec);
+template std::ostream& operator<<(std::ostream& os, const Vector<bool>& vec);
+template std::ostream& operator<<(std::ostream& os, const Vector<GraphNode<Traits<int, int>>*>& vec);
+template std::ostream& operator<<(std::ostream& os, const Vector<GraphNode<Traits<std::string, int>>*>& vec);
+template std::ostream& operator<<(std::ostream& os, const Vector<GraphNode<Traits<double, float>>*>& vec);
+template std::ostream& operator<<(std::ostream& os, const Vector<Edge<Traits<int, int>>*>& vec);
+template std::ostream& operator<<(std::ostream& os, const Vector<Edge<Traits<std::string, int>>*>& vec);
+template std::ostream& operator<<(std::ostream& os, const Vector<Edge<Traits<double, float>>*>& vec);
