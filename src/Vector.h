@@ -17,6 +17,8 @@ private:
 
 public:
     Vector(int initialCapacity = 10);
+    Vector(const Vector<T>& other);
+    Vector<T>& operator=(const Vector<T>& other);
     ~Vector();
 
     void add_item_end(T item);
@@ -32,24 +34,42 @@ public:
     bool is_empty() const;
     void clear();
     void print() const;
+
+    bool operator==(const Vector<T>& other) const;
+    bool operator<(const Vector<T>& other) const;
+
+    //funciones nuevas
+    void resize_to_size(int new_size); 
 };
 
-// frward
+
+template<class T>
+std::ostream& operator<<(std::ostream& os, const Vector<T>& vec);
+
+std::ostream& operator<<(std::ostream& os, const Vector<Vector<int>>& vec);
+std::ostream& operator<<(std::ostream& os, const Vector<Vector<float>>& vec);
+
 template<typename K, typename V>
 class Traits;
 
 template<typename T>
-class Node;
+class GraphNode;
 
 template<typename T>
 class Edge;
 
 //instanciaciones
-extern template class Vector<Node<Traits<int, int>>*>;
+extern template class Vector<bool>;
+extern template class Vector<int>;
+extern template class Vector<float>;
+extern template class Vector<Vector<int>>;
+extern template class Vector<Vector<float>>;
+
+extern template class Vector<GraphNode<Traits<int, int>>*>;
 extern template class Vector<Edge<Traits<int, int>>*>;
-extern template class Vector<Node<Traits<std::string, int>>*>;
+extern template class Vector<GraphNode<Traits<std::string, int>>*>;
 extern template class Vector<Edge<Traits<std::string, int>>*>;
-extern template class Vector<Node<Traits<double, float>>*>;
+extern template class Vector<GraphNode<Traits<double, float>>*>;
 extern template class Vector<Edge<Traits<double, float>>*>;
 
 #endif
