@@ -40,6 +40,10 @@ public:
     
     GraphNode(N _data);
     
+    
+    ~GraphNode() {
+    }
+    
     // Const-qualified method to get adjacency size
     int adjacency_size() const {
         return adjacency.size();
@@ -64,7 +68,7 @@ public:
     int index_of(N data);
     void init_visited();
     void validation(int u, int v);
-    void resize_matrix();
+    void resize_matrix(); //optimizado
 
     Graph(bool _directed = false);
     void add_node(N _data);
