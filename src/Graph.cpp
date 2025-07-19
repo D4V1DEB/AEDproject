@@ -253,6 +253,65 @@ void Graph<T>::Breadth_First_Search(typename T::N s, typename T::N t) {
     }
 }
 
+template<class T>
+void Graph<T>::Dijkstra(typename T::N s, typename T::N t) {
+    using ND = NodeDistance<int,E>;  // índice y distancia
+    PriorityQueue<ND> pq;
+
+    int INF = 2147483647;
+
+    Vector<E> distancias;
+    Vector<int> predecesores;
+
+    distancias.resize_to_size(num_vertices());
+    predecesores.resize_to_size(num_vertices());
+
+    for (int i = 0; i < num_vertices(); ++i) {
+        distancias.set(i, INF);
+        predecesores.set(i, -1);
+    }
+
+    int start_idx = index_of(s);
+    int end_idx = index_of(t);
+
+    distancias.set(start_idx, 0);
+    pq.push({0, start_idx});
+
+    while (!pq.empty()) {
+        ND current = pq.pop();
+        int u_idx = current.node;
+
+        if (u_idx == end_idx) break;
+
+        GraphNode* u_node = vertices.get(u_idx);
+
+        for (int i = 0; i < u_node->adjacency.size(); ++i) {
+            edge* e = u_node->adjacency.get(i);
+            GraphNode* neighbor = (e->nodes[0] == u_node) ? e->nodes[1] : e->nodes[0];
+            int v_idx = index_of(neighbor->data);
+            E weight = e->data;
+
+            if (distancias.get(u_idx) + weight < distancias.get(v_idx)) {
+                distancias.set(v_idx, distancias.get(u_idx) + weight);
+                predecesores.set(v_idx, u_idx);
+                pq.push({distancias.get(v_idx), v_idx});
+            }
+        }
+    }
+
+    std::cout << "Distancia mínima: " << distancias.get(end_idx) << "\n";
+
+    Vector<int> path;
+    for (int at = end_idx; at != -1; at = predecesores.get(at)) {
+        path.add_item_end(at);
+    }
+
+    std::cout << "Camino: ";
+    for (int i = path.size()-1; i >= 0; --i) {
+        std::cout << vertices.get(path.get(i))->data << " ";
+    }
+    std::cout << "\n";
+}
 
 template<class T>
 Graph<T>::~Graph() {
