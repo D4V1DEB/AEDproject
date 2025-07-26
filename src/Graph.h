@@ -2,6 +2,7 @@
 #define GRAPH_H
 
 #include "Vector.h"
+#include "PriorityQueue.h"
 #include <iostream>
 #include <string>
 
@@ -83,6 +84,7 @@ public:
     //Busquedas
     void Depth_First_Search(N s, N t);
     void Breadth_First_Search(N s, N t);
+    void Dijkstra(N s, N t);
 
     ~Graph();
 };
