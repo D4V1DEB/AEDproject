@@ -10,8 +10,14 @@ Edge<T>::Edge(typename T::E _data) : data(_data) {
     nodes[0] = nodes[1] = nullptr;
 }
 
+//constructor inicial
+/* 
 template<class T>
 GraphNode<T>::GraphNode(typename T::N _data) : data(_data) {}
+*/
+
+template<class T>
+GraphNode<T>::GraphNode(typename T::N _data, double x, double y) : data(_data), coords(x, y) {}
 
 template<class T>
 int Graph<T>::index_of(N data) {
@@ -74,11 +80,20 @@ void Graph<T>::resize_matrix() {
 }
 
 template<class T>
-Graph<T>::Graph(bool _directed) : directed(_directed) {}
+Graph<T>::Graph(bool _directed, HeuristicType _heuristic) : directed(_directed), heuristic_type(_heuristic) {}
 
+/*
 template<class T>
 void Graph<T>::add_node(typename T::N _data) {
     GraphNode* n = new GraphNode(_data);
+    vertices.add_item_end(n);
+    resize_matrix();
+}
+*/
+
+template<class T>
+void Graph<T>::add_node(typename T::N _data, double x, double y) {
+    GraphNode* n = new GraphNode(_data, x, y);
     vertices.add_item_end(n);
     resize_matrix();
 }
@@ -142,6 +157,24 @@ void Graph<T>::add_edge_by_index(int u, int v, E w) {
     }
 }
 
+template<class T>
+double Graph<T>::calculate_heuristic(int from_idx, int to_idx) {
+    if (from_idx < 0 || from_idx >= vertices.size() || 
+        to_idx < 0 || to_idx >= vertices.size()) {
+        return 0.0;
+    }
+    
+    GraphNode* from_node = vertices.get(from_idx);
+    GraphNode* to_node = vertices.get(to_idx);
+    
+    if (heuristic_type == HAVERSINE) {
+        return from_node->coords.haversine_distance(to_node->coords);
+    } else {
+        return from_node->coords.euclidean_distance(to_node->coords);
+    }
+}
+
+//debug
 template<class T>
 void Graph<T>::print_graph() {
     for (int i = 0; i < vertices.size(); ++i) {
@@ -228,7 +261,7 @@ void Graph<T>::Breadth_First_Search(typename T::N s, typename T::N t) {
     Queue<N> queue;
     queue.push(s);
     visited.set(start_idx, true);
-    
+
     while (!queue.empty()) {
         N current = queue.front();
         queue.pop();
@@ -312,6 +345,69 @@ void Graph<T>::Dijkstra(typename T::N s, typename T::N t) {
     }
     std::cout << "\n";
 }
+
+template<class T>
+void Graph<T>::Best_First_Search(typename T::N s, typename T::N t) {
+    int start_idx = index_of(s);
+    int target_idx = index_of(t);
+    
+    if (start_idx == -1 || target_idx == -1) {
+        std::cout << "Nodo inicial o final no encontrado\n";
+        return;
+    }
+
+    init_visited();
+    PriorityQueue<NodeDistance<N, double>> pq;
+    
+    // heuristica inicial y agregar nodo inicial
+    double initial_heuristic = calculate_heuristic(start_idx, target_idx);
+    NodeDistance<N, double> start_node;
+    start_node.node = s;
+    start_node.distance = initial_heuristic;
+    
+    pq.push(start_node);
+    visited.set(start_idx, true);
+
+    std::cout << "Best First Search desde " << s << " hasta " << t << ":\n";
+    std::cout << "Usando heuristica: " << (heuristic_type == HAVERSINE ? "Haversine" : "Euclidiana") << "\n";
+
+    while (!pq.empty()) {
+        NodeDistance<N, double> current_node = pq.pop();
+        N current = current_node.node;
+        
+        std::cout << current << " (h=" << current_node.distance << ") ";
+        
+        if (current == t) {
+            std::cout << "\nEncontrado\n";
+            break;
+        }
+
+        int current_idx = index_of(current);
+        if (current_idx == -1) continue;
+
+        GraphNode* current_graph_node = vertices.get(current_idx);
+        
+        for (int i = 0; i < current_graph_node->adjacency.size(); ++i) {
+            edge* e = current_graph_node->adjacency.get(i);
+            GraphNode* neighbor = (e->nodes[0] == current_graph_node) ? e->nodes[1] : e->nodes[0];
+
+            int neighbor_idx = index_of(neighbor->data);
+            if (neighbor_idx != -1 && !visited.get(neighbor_idx)) {
+                visited.set(neighbor_idx, true);
+                
+                // Calcular heurística para el vecino
+                double heuristic_value = calculate_heuristic(neighbor_idx, target_idx);
+                NodeDistance<N, double> neighbor_node;
+                neighbor_node.node = neighbor->data;
+                neighbor_node.distance = heuristic_value;
+                
+                pq.push(neighbor_node);
+            }
+        }
+    }
+    std::cout << "\n";
+}
+
 
 template<class T>
 Graph<T>::~Graph() {
