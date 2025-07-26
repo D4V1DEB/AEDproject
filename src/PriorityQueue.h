@@ -20,6 +20,7 @@ template class PriorityQueue<NodeDistance<int, int>>;
 template class PriorityQueue<NodeDistance<int, float>>;
 template class PriorityQueue<NodeDistance<int, double>>;
 template class PriorityQueue<NodeDistance<std::string, int>>;
+template class PriorityQueue<NodeDistance<std::string, double>>;
 template class PriorityQueue<NodeDistance<double, float>>;
 
 #endif //PRIORITYQUEUE_H

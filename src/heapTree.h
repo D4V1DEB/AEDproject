@@ -67,6 +67,7 @@ template class HeapTree<NodeDistance<int, int>>;
 template class HeapTree<NodeDistance<int, float>>;
 template class HeapTree<NodeDistance<int, double>>;
 template class HeapTree<NodeDistance<std::string, int>>;
+template class HeapTree<NodeDistance<std::string, double>>;
 template class HeapTree<NodeDistance<double, float>>;
 
 #endif // HEAPTREE_H

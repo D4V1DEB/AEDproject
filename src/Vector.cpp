@@ -246,6 +246,8 @@ template class Vector<NodeDistance<int, float>>;
 template class Vector<NodeDistance<std::string, int>>;
 template class Vector<NodeDistance<double, float>>;
 template class Vector<NodeDistance<int, double>>;
+template class Vector<NodeDistance<double, double>>;
+template class Vector<NodeDistance<std::string, double>>;
 
 // Implementation of operator<< (declared in Vector.h)
 template<class T>
@@ -318,3 +320,5 @@ template std::ostream& operator<<(std::ostream& os, const Vector<NodeDistance<in
 template std::ostream& operator<<(std::ostream& os, const Vector<NodeDistance<int, float>>& vec);
 template std::ostream& operator<<(std::ostream& os, const Vector<NodeDistance<std::string, int>>& vec);
 template std::ostream& operator<<(std::ostream& os, const Vector<NodeDistance<double, float>>& vec);
+template std::ostream& operator<<(std::ostream& os, const Vector<NodeDistance<double, double>>& vec);
+template std::ostream& operator<<(std::ostream& os, const Vector<NodeDistance<std::string, double>>& vec);
